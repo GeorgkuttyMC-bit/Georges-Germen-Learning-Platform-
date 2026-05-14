@@ -54,7 +54,7 @@ const RESPONSE_SCHEMA = {
 export async function generateLearningMaterial(subject: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.5-flash",
     contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
     config: {
       responseMimeType: "application/json",
@@ -69,7 +69,7 @@ export async function generateLearningMaterial(subject: string) {
 export function getChatSession() {
   const ai = getAI();
   return ai.chats.create({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.5-flash",
     config: {
       temperature: 0.7,
       systemInstruction: "You are a friendly and encouraging German language tutor. Chat in German with the student. Keep sentences relatively simple but natural, suitable for a learner (A2/B1 level). If they make a grammatical or spelling mistake, gently correct them in English in a separate paragraph at the end, but prioritize giving a natural German response first.",
