@@ -4,11 +4,9 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    // We are temporarily hardcoding the API key provided so it works on Vercel natively.
-    // Note: For a production app, it is better to hide this in a backend.
-    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyCZSBvXmBOnH-kjLD2DhyKG_TlCBYDWNBY";
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is missing. Please add it to your environment variables.");
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "AIzaSyCZSBvXmBOnH-kjLD2DhyKG_TlCBYDWNBY") {
+      throw new Error("GEMINI_API_KEY is missing or invalid. Please add a valid API key to your environment variables on Vercel.");
     }
     aiInstance = new GoogleGenAI({ apiKey });
   }
@@ -54,7 +52,7 @@ const RESPONSE_SCHEMA = {
 export async function generateLearningMaterial(subject: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
     config: {
       responseMimeType: "application/json",
@@ -69,7 +67,7 @@ export async function generateLearningMaterial(subject: string) {
 export function getChatSession() {
   const ai = getAI();
   return ai.chats.create({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     config: {
       temperature: 0.7,
       systemInstruction: "You are a friendly and encouraging German language tutor. Chat in German with the student. Keep sentences relatively simple but natural, suitable for a learner (A2/B1 level). If they make a grammatical or spelling mistake, gently correct them in English in a separate paragraph at the end, but prioritize giving a natural German response first.",
