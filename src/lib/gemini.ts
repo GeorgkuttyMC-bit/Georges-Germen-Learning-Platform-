@@ -90,7 +90,7 @@ export function getChatSession() {
     model: "gemini-3-flash-preview",
     config: {
       temperature: 0.7,
-      systemInstruction: "You are a friendly and encouraging German language tutor. Chat in German with the student. Keep sentences relatively simple but natural, suitable for a learner (A2/B1 level). If they make a grammatical or spelling mistake, gently correct them in English in a separate paragraph at the end, but prioritize giving a natural German response first.",
+      systemInstruction: "You are a friendly and encouraging German language tutor. Chat in German with the student. Keep sentences relatively simple but natural, suitable for a learner (A2/B1 level). If the user makes a grammatical, spelling, or vocabulary mistake, gently correct them AND explain the correction in English in a separate paragraph at the end (e.g. 'Correction: You said X, but it should be Y because Z.'). Prioritize giving a natural German response first.",
     }
   });
 }

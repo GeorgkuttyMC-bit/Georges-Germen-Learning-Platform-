@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import TeacherTab from './components/TeacherTab';
 import LearnTab from './components/LearnTab';
-import ConversationTab from './components/ConversationTab';
 import ProgressTab from './components/ProgressTab';
-import { BookOpen, MessageCircle, TrendingUp, Lightbulb, GraduationCap } from 'lucide-react';
+import ChatPopup from './components/ChatPopup';
+import { BookOpen, TrendingUp, Lightbulb, GraduationCap, MessageCircle } from 'lucide-react';
+import { AnimatePresence } from 'motion/react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'teacher' | 'learn' | 'conversation' | 'progress'>('teacher');
+  const [activeTab, setActiveTab] = useState<'teacher' | 'learn' | 'progress'>('teacher');
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#fdfbf7] font-sans text-[#2b2b2b] selection:bg-orange-100">
@@ -66,8 +68,8 @@ export default function App() {
                 <div className="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-4">
                   <MessageCircle className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">3. Tutor Chat</h3>
-                <p className="text-sm text-gray-600">Practice makes perfect. Chat interactively with our AI tutor to improve your conversational skills and get instant feedback.</p>
+                <h3 className="font-semibold text-gray-900 mb-2">3. Tutor Chat Popup</h3>
+                <p className="text-sm text-gray-600">Practice makes perfect. Click the floating chat button on the bottom right to talk to our AI tutor anytime.</p>
               </div>
               <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100/50">
                 <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4">
@@ -88,12 +90,11 @@ export default function App() {
             {[
               { id: 'teacher', label: 'Teacher', icon: <GraduationCap className="w-4 h-4" /> },
               { id: 'learn', label: 'Learn & Explore', icon: <BookOpen className="w-4 h-4" /> },
-              { id: 'conversation', label: 'Tutor Chat', icon: <MessageCircle className="w-4 h-4" /> },
               { id: 'progress', label: 'My Journey', icon: <TrendingUp className="w-4 h-4" /> }
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'teacher' | 'learn' | 'conversation' | 'progress')}
+                onClick={() => setActiveTab(tab.id as 'teacher' | 'learn' | 'progress')}
                 className={`flex items-center gap-2 px-5 py-3 transition whitespace-nowrap border-b-[3px] md:-mb-px ${
                   activeTab === tab.id 
                     ? 'border-orange-500 text-orange-700 bg-orange-50/50 rounded-t-xl' 
@@ -112,9 +113,27 @@ export default function App() {
       <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {activeTab === 'teacher' && <TeacherTab />}
         {activeTab === 'learn' && <LearnTab />}
-        {activeTab === 'conversation' && <ConversationTab />}
         {activeTab === 'progress' && <ProgressTab />}
       </main>
+
+      {/* Floating Chat Button */}
+      {!isChatOpen && (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-6 right-6 w-16 h-16 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 z-50 group"
+          title="Open Tutor Chat"
+        >
+          <MessageCircle className="w-8 h-8" />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
+        </button>
+      )}
+
+      {/* Chat Popup */}
+      <AnimatePresence>
+        {isChatOpen && (
+          <ChatPopup onClose={() => setIsChatOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
