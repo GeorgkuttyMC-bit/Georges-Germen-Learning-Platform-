@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getChatSession } from '../lib/gemini';
-import { Send, Loader2, Bot, User } from 'lucide-react';
+import { Send, Loader2, Bot, User, Mic, MicOff, Volume2 } from 'lucide-react';
 import { useProgress } from '../store/progress';
 import { motion } from 'motion/react';
+import { playGermanAudio } from '../lib/audio';
 
 type Message = {
   text: string;
@@ -16,8 +17,11 @@ export default function ConversationTab() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [chatSession, setChatSession] = useState<any>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
   
   const { increment } = useProgress();
 
@@ -29,7 +33,58 @@ export default function ConversationTab() {
       console.error("Failed to initialize chat session", err);
       setMessages([{ text: "Error: Missing GEMINI_API_KEY. Please add it to your environment variables.", sender: 'bot', isError: true }]);
     }
+
+    // Initialize Speech Recognition
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.lang = 'de-DE';
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+
+        recognitionRef.current.onresult = (event: any) => {
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            }
+          }
+          if (finalTranscript) {
+            setInput((prev) => prev + (prev ? ' ' : '') + finalTranscript);
+          }
+        };
+
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Speech recognition error', event.error);
+          setIsListening(false);
+        };
+
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
+    }
   }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition is not supported in your browser.");
+      return;
+    }
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -37,11 +92,16 @@ export default function ConversationTab() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isListening]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !chatSession || loading) return;
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }
 
     const userMsg = input.trim();
     setInput('');
@@ -52,6 +112,8 @@ export default function ConversationTab() {
     try {
       const response = await chatSession.sendMessage({ message: userMsg });
       setMessages(prev => [...prev, { text: response.text, sender: 'bot' }]);
+      // Optionally play the response automatically:
+      // playGermanAudio(response.text);
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, { text: "Sorry, I had trouble responding. Please try again.", sender: 'bot', isError: true }]);
@@ -88,7 +150,19 @@ export default function ConversationTab() {
                   ? 'bg-red-50 text-red-600 rounded-bl-sm border border-red-100'
                   : 'bg-white text-gray-800 rounded-bl-sm border border-[#f0eadd]'
             }`}>
-              {msg.text}
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">{msg.text}</div>
+                {msg.sender === 'bot' && !msg.isError && (
+                  <button 
+                    onClick={() => playGermanAudio(msg.text)} 
+                    className="text-orange-500 hover:text-orange-600 focus:outline-none flex-shrink-0 mt-1" 
+                    title="Listen to pronunciation"
+                    type="button"
+                  >
+                     <Volume2 className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
             {msg.sender === 'user' && (
                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-300">
@@ -113,19 +187,32 @@ export default function ConversationTab() {
       </div>
 
       <div className="p-4 sm:p-5 bg-white border-t border-[#f0eadd] shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
-        <form onSubmit={handleSend} className="flex gap-3">
+        <form onSubmit={handleSend} className="flex gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={toggleListening}
+            className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-2xl transition shadow-sm flex-shrink-0 border ${
+              isListening 
+                ? 'bg-red-50 text-red-500 border-red-200 animate-pulse' 
+                : 'bg-white text-gray-500 hover:bg-gray-50 border-gray-200'
+            }`}
+            title={isListening ? "Stop listening" : "Start speaking (German)"}
+          >
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+          
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message in German..."
-            className="flex-1 px-5 py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-[#fefdfb] text-base placeholder:text-gray-400"
+            placeholder={isListening ? "Listening..." : "Type your message in German..."}
+            className="flex-1 px-4 sm:px-5 py-3 sm:py-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-[#fefdfb] text-base placeholder:text-gray-400"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-orange-600 text-white w-14 h-14 flex items-center justify-center rounded-2xl hover:bg-orange-700 transition disabled:opacity-50 shadow-sm flex-shrink-0"
+            className="bg-orange-600 text-white w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-2xl hover:bg-orange-700 transition disabled:opacity-50 shadow-sm flex-shrink-0"
           >
             <Send className="w-5 h-5" />
           </button>
