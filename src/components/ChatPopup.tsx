@@ -11,9 +11,27 @@ type Message = {
   isError?: boolean;
 };
 
+const LadyIcon = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M12 2A4.5 4.5 0 0 0 7.5 6.5C7.5 9 10 11 12 11s4.5-2 4.5-4.5A4.5 4.5 0 0 0 12 2Z" />
+    <path d="M2 22a10 10 0 0 1 20 0" />
+    <path d="M7.5 6.5c-3 0-5.5 2.5-5.5 5.5v2" />
+    <path d="M16.5 6.5c3 0 5.5 2.5 5.5 5.5v2" />
+  </svg>
+);
+
 export default function ChatPopup({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([
-    { text: "Hallo! Ich bin dein Deutschlehrer. Lass uns auf Deutsch schreiben oder sprechen! Wie geht es dir heute?", sender: 'bot' }
+    { text: "Hallo! Ich bin deine Deutschlehrerin. Lass uns auf Deutsch schreiben oder sprechen! Wie geht es dir heute?", sender: 'bot' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -221,8 +239,8 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
     >
       <div className="p-4 bg-orange-600 text-white flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Bot className="w-6 h-6" />
-          <span className="font-semibold text-lg">Deutschlehrer</span>
+          <LadyIcon className="w-6 h-6" />
+          <span className="font-semibold text-lg">Deutschlehrerin</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -245,7 +263,7 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
           <div key={i} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.sender === 'bot' && (
                <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-                 <Bot className="w-4 h-4 text-orange-500" />
+                 <LadyIcon className="w-4 h-4 text-orange-500" />
                </div>
             )}
             <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap shadow-sm ${
@@ -272,7 +290,7 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
         {loading && (
           <div className="flex gap-3 justify-start">
              <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0">
-               <Bot className="w-4 h-4 text-orange-500" />
+               <LadyIcon className="w-4 h-4 text-orange-500" />
              </div>
              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-orange-400 animate-bounce"></span>
