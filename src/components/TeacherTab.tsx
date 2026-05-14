@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookA, Hash, BookHeart, MessageSquare, Volume2 } from 'lucide-react';
+import { BookA, Hash, BookHeart, MessageSquare, Volume2, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const playPronunciation = (text: string) => {
@@ -376,6 +376,62 @@ const lessons = [
             </div>
          </div>
       </div>
+    )
+  },
+  {
+    id: 'story',
+    title: 'Short Story',
+    icon: <BookOpen className="w-5 h-5" />,
+    description: 'Read a short German story with line-by-line English translation.',
+    content: (
+       <div className="space-y-6 text-gray-700">
+          <p className="text-lg">Reading short stories is a great way to learn new vocabulary and see grammar in context. Here is a simple story about a little dog.</p>
+          
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-orange-100">
+             <h3 className="font-serif text-2xl font-bold text-orange-900 mb-6">Der kleine Hund (The Little Dog)</h3>
+             <div className="space-y-6">
+                {[
+                  { de: 'Es war einmal ein kleiner Hund.', en: 'Once upon a time there was a little dog.' },
+                  { de: 'Er hieß Bruno.', en: 'His name was Bruno.' },
+                  { de: 'Bruno war braun und hatte große Ohren.', en: 'Bruno was brown and had big ears.' },
+                  { de: 'Jeden Tag spielte er im Park.', en: 'Every day he played in the park.' },
+                  { de: 'Er liebte es, einem Ball nachzulaufen.', en: 'He loved to run after a ball.' },
+                  { de: 'Eines Tages fand er einen großen Knochen.', en: 'One day he found a big bone.' },
+                  { de: 'Er war sehr glücklich und trug ihn nach Hause.', en: 'He was very happy and carried it home.' },
+                  { de: 'Bruno war ein stolzer Hund.', en: 'Bruno was a proud dog.' }
+                ].map((line, i) => (
+                   <div key={i} className="flex flex-col gap-1.5 border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                      <div className="flex items-center gap-3">
+                         <button
+                           onClick={() => playPronunciation(line.de)}
+                           className="p-1.5 rounded-full text-orange-400 bg-orange-50 hover:bg-orange-100 hover:text-orange-600 transition-colors flex-shrink-0"
+                           aria-label={`Play pronunciation for ${line.de}`}
+                         >
+                           <Volume2 className="w-4 h-4" />
+                         </button>
+                         <span className="font-medium text-lg text-gray-900 leading-snug">{line.de}</span>
+                      </div>
+                      <div className="pl-11 border-l-2 border-transparent">
+                        <span className="text-gray-500 italic block">{line.en}</span>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+
+          <div className="bg-green-50/50 p-6 md:p-8 rounded-3xl border border-green-100 mt-8">
+            <h4 className="font-serif text-2xl font-bold text-green-900 mb-3 flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-green-600" />
+              Story Explanation
+            </h4>
+            <p className="text-gray-700 text-base mb-4 leading-relaxed">
+              This short story introduces past tense forms (Präteritum) such as <strong>war</strong> (was), <strong>hieß</strong> (was called/named), <strong>spielte</strong> (played), and <strong>fand</strong> (found).
+            </p>
+            <p className="text-gray-700 text-base leading-relaxed">
+              Notice how the verb remains the second idea of the sentence! For example, after the time phrase in <em>"Eines Tages <strong>fand</strong> er..." (One day found he...)</em>.
+            </p>
+          </div>
+       </div>
     )
   }
 ];
