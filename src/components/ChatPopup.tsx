@@ -202,7 +202,9 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
       setMessages(prev => [...prev, { text: response.text, sender: 'bot' }]);
       
       if (continuousModeRef.current) {
-        playGermanAudio(response.text, () => {
+        // Only speak the German part (usually the first paragraph before any English correction)
+        const germanTextToSpeak = response.text.split(/(?:(?:^|\n)Correction:|\n\n)/i)[0].trim();
+        playGermanAudio(germanTextToSpeak, () => {
            if (continuousModeRef.current) {
               startListening();
            }
@@ -276,7 +278,10 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
               {msg.text}
               {msg.sender === 'bot' && !msg.isError && (
                 <button 
-                  onClick={() => playGermanAudio(msg.text)} 
+                  onClick={() => {
+                    const germanTextToSpeak = msg.text.split(/(?:(?:^|\n)Correction:|\n\n)/i)[0].trim();
+                    playGermanAudio(germanTextToSpeak);
+                  }} 
                   className="block mt-2 text-orange-500 hover:text-orange-600" 
                   title="Listen to pronunciation"
                   type="button"

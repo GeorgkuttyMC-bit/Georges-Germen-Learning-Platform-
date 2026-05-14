@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TeacherTab from './components/TeacherTab';
 import LearnTab from './components/LearnTab';
 import ProgressTab from './components/ProgressTab';
 import ChatPopup from './components/ChatPopup';
-import { BookOpen, TrendingUp, Lightbulb, GraduationCap, MessageCircle } from 'lucide-react';
-import { AnimatePresence } from 'motion/react';
+import { BookOpen, TrendingUp, Lightbulb, GraduationCap, MessageCircle, ArrowUp } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'teacher' | 'learn' | 'progress'>('teacher');
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-[#fdfbf7] font-sans text-[#2b2b2b] selection:bg-orange-100">
@@ -127,6 +145,22 @@ export default function App() {
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div>
         </button>
       )}
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 w-14 h-14 bg-white text-orange-600 rounded-full shadow-lg flex items-center justify-center transition-all hover:bg-orange-50 border border-orange-100 z-40 hover:scale-105"
+            title="Scroll to Top"
+          >
+            <ArrowUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Chat Popup */}
       <AnimatePresence>

@@ -73,7 +73,7 @@ export async function generateLearningMaterial(subject: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a key grammar concept from the essay, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
+    contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a key grammar concept from the essay, a vocabulary list, and 5 multiple-choice questions to test comprehension.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,

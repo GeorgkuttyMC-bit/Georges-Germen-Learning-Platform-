@@ -24,7 +24,6 @@ export default function LearnTab() {
   const [material, setMaterial] = useState<Material | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
-  const [showResults, setShowResults] = useState(false);
   
   const { increment } = useProgress();
 
@@ -35,7 +34,6 @@ export default function LearnTab() {
     setLoading(true);
     setMaterial(null);
     setQuizAnswers({});
-    setShowResults(false);
     stopAudio();
     setIsPlaying(false);
 
@@ -61,15 +59,15 @@ export default function LearnTab() {
     }
   };
 
-  const handleQuizSubmit = () => {
-    setShowResults(true);
-    let correct = 0;
-    material?.quizzes.forEach((q, idx) => {
-      if (quizAnswers[idx] === q.correctOptionIndex) correct++;
-    });
+  const handleOptionSelect = (quizIdx: number, optIdx: number, correctOptionIndex: number) => {
+    if (quizAnswers[quizIdx] !== undefined) return;
     
-    increment('quizzesTaken', material?.quizzes.length || 0);
-    increment('quizzesPassed', correct);
+    setQuizAnswers(prev => ({ ...prev, [quizIdx]: optIdx }));
+    
+    increment('quizzesTaken', 1);
+    if (optIdx === correctOptionIndex) {
+      increment('quizzesPassed', 1);
+    }
   };
 
   return (
@@ -229,15 +227,17 @@ export default function LearnTab() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {material.vocabulary.map((v, i) => (
                 <div key={i} className="bg-[#fcf8f2] p-5 rounded-2xl border border-orange-100/50 group hover:border-orange-200 transition-colors">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="font-bold text-gray-900 text-xl leading-tight font-serif">{v.word}</div>
-                    <button
-                      onClick={() => playGermanAudio(v.word)}
-                      className="p-2 rounded-full bg-orange-50 shadow-sm border border-orange-100 text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition flex-shrink-0 focus:ring-2 focus:ring-orange-500/50"
-                      title="Listen to pronunciation"
-                    >
-                      <Volume2 className="w-5 h-5" />
-                    </button>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="font-bold text-gray-900 text-xl leading-tight font-serif">{v.word}</div>
+                      <button
+                        onClick={() => playGermanAudio(v.word)}
+                        className="p-1 rounded-full text-orange-400 hover:bg-orange-100 hover:text-orange-600 transition flex-shrink-0"
+                        title="Listen to pronunciation"
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="text-gray-600 font-medium">{v.translation}</div>
                 </div>
@@ -249,60 +249,97 @@ export default function LearnTab() {
           <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#f0eadd]">
             <h3 className="font-serif text-2xl font-semibold text-gray-900 mb-8">Knowledge Check</h3>
             <div className="space-y-10 mb-10">
-              {material.quizzes.map((quiz, quizIdx) => (
-                <div key={quizIdx} className="space-y-5">
-                  <p className="font-semibold text-xl text-gray-900 font-serif">{quizIdx + 1}. {quiz.question}</p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {quiz.options.map((opt, optIdx) => {
-                      const isSelected = quizAnswers[quizIdx] === optIdx;
-                      const isCorrect = showResults && optIdx === quiz.correctOptionIndex;
-                      const isWrong = showResults && isSelected && optIdx !== quiz.correctOptionIndex;
-                      
-                      let btnClass = "text-left px-6 py-4 rounded-2xl border-2 transition "
-                      if (isCorrect) {
-                        btnClass += "border-green-500 bg-green-50 text-green-800 font-semibold";
-                      } else if (isWrong) {
-                        btnClass += "border-red-500 bg-red-50 text-red-800 font-semibold";
-                      } else if (isSelected) {
-                        btnClass += "border-orange-500 bg-orange-50 text-orange-800 font-semibold";
-                      } else {
-                        btnClass += "border-gray-200 hover:border-orange-300 hover:bg-[#fcf8f2] text-gray-700 bg-white";
-                      }
+              {material.quizzes.map((quiz, quizIdx) => {
+                const hasAnswered = quizAnswers[quizIdx] !== undefined;
+                const isCorrectAnswer = quizAnswers[quizIdx] === quiz.correctOptionIndex;
 
-                      return (
-                        <button
-                          key={optIdx}
-                          disabled={showResults}
-                          onClick={() => setQuizAnswers(prev => ({ ...prev, [quizIdx]: optIdx }))}
-                          className={btnClass}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="leading-snug">{opt}</span>
-                            {isCorrect && <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />}
-                            {isWrong && <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />}
-                          </div>
-                        </button>
-                      );
-                    })}
+                return (
+                  <div key={quizIdx} className="space-y-5">
+                    <p className="font-semibold text-xl text-gray-900 font-serif">{quizIdx + 1}. {quiz.question}</p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {quiz.options.map((opt, optIdx) => {
+                        const isSelected = quizAnswers[quizIdx] === optIdx;
+                        const isCorrectOption = optIdx === quiz.correctOptionIndex;
+                        const showAsCorrect = hasAnswered && isCorrectOption;
+                        const showAsWrong = hasAnswered && isSelected && !isCorrectOption;
+
+                        let btnClass = "text-left px-6 py-4 rounded-2xl border-2 transition "
+                        if (showAsCorrect) {
+                          btnClass += "border-green-500 bg-green-50 text-green-800 font-semibold";
+                        } else if (showAsWrong) {
+                          btnClass += "border-red-500 bg-red-50 text-red-800 font-semibold opacity-75";
+                        } else if (hasAnswered) {
+                          btnClass += "border-gray-100 bg-gray-50 text-gray-400 opacity-50";
+                        } else {
+                          btnClass += "border-gray-200 hover:border-orange-300 hover:bg-[#fcf8f2] text-gray-700 bg-white shadow-sm";
+                        }
+
+                        return (
+                          <button
+                            key={optIdx}
+                            disabled={hasAnswered}
+                            onClick={() => handleOptionSelect(quizIdx, optIdx, quiz.correctOptionIndex)}
+                            className={btnClass}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="leading-snug">{opt}</span>
+                              {showAsCorrect && <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />}
+                              {showAsWrong && <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {hasAnswered && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        className={`mt-4 px-5 py-4 rounded-2xl flex items-start gap-3 ${
+                          isCorrectAnswer 
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-red-100 text-red-800 border border-red-200'
+                        }`}
+                      >
+                        {isCorrectAnswer ? (
+                          <>
+                            <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-lg block mb-1">Richtig! (Correct!)</span>
+                              <span className="opacity-90">Great job, you got it right.</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-lg block mb-1">Nicht ganz richtig. (Not quite right.)</span>
+                              <span className="opacity-90">The correct answer was: <strong>{quiz.options[quiz.correctOptionIndex]}</strong></span>
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
-            {!showResults && Object.keys(quizAnswers).length === material.quizzes.length && (
-              <button
-                onClick={handleQuizSubmit}
-                className="w-full py-4 bg-orange-600 text-white rounded-2xl font-bold text-lg hover:bg-orange-700 transition shadow-sm"
+            {Object.keys(quizAnswers).length === material.quizzes.length && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-6 bg-orange-50 border border-orange-200 text-orange-900 rounded-3xl font-semibold text-center text-xl shadow-sm flex flex-col items-center justify-center gap-3"
               >
-                Submit Answers
-              </button>
-            )}
-            
-            {showResults && (
-              <div className="p-6 bg-green-50 border border-green-200 text-green-800 rounded-2xl font-semibold text-center text-xl flex items-center justify-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-500" />
-                You got {material.quizzes.filter((q, i) => quizAnswers[i] === q.correctOptionIndex).length} out of {material.quizzes.length} correct!
-              </div>
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-2">
+                  <CheckCircle className="w-8 h-8 text-orange-500" />
+                </div>
+                <div>
+                  Excellent effort!
+                  <div className="text-orange-700/80 text-base mt-2 font-medium">
+                    You got {material.quizzes.filter((q, i) => quizAnswers[i] === q.correctOptionIndex).length} out of {material.quizzes.length} correct.
+                  </div>
+                </div>
+              </motion.div>
             )}
           </div>
         </motion.div>
