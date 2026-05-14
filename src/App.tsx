@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
+import TeacherTab from './components/TeacherTab';
 import LearnTab from './components/LearnTab';
 import ConversationTab from './components/ConversationTab';
 import ProgressTab from './components/ProgressTab';
-import { BookOpen, MessageCircle, TrendingUp, Lightbulb } from 'lucide-react';
+import { BookOpen, MessageCircle, TrendingUp, Lightbulb, GraduationCap } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'learn' | 'conversation' | 'progress'>('learn');
+  const [activeTab, setActiveTab] = useState<'teacher' | 'learn' | 'conversation' | 'progress'>('teacher');
 
   return (
     <div className="min-h-screen bg-[#fdfbf7] font-sans text-[#2b2b2b] selection:bg-orange-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-[#f0eadd] sticky top-0 z-20 shadow-sm">
+      {/* Header Top & Welcome */}
+      <header className="bg-white/80 backdrop-blur-md pt-4">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between py-4 space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0">
             
             <div className="flex justify-between items-center w-full md:w-auto">
               <div className="flex items-center gap-3 text-orange-700">
@@ -41,15 +42,58 @@ export default function App() {
             </a>
           </div>
 
-          <nav className="flex overflow-x-auto hide-scrollbar gap-2 pb-0 font-medium text-sm md:text-base border-t border-[#f0eadd] pt-2 md:border-t-0 md:pt-0" style={{WebkitOverflowScrolling: 'touch'}}>
+          <div className="mb-8 bg-white rounded-[2rem] p-6 md:p-10 shadow-sm border border-[#f0eadd]">
+            <h1 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">Willkommen! Your German Journey Starts Here</h1>
+            <p className="text-lg text-gray-600 mb-8 max-w-3xl">
+              Mastering a new language is an adventure. We have structured this platform into four specialized tools to guide you from learning your first letters to holding fluent conversations. Here is how to navigate your learning path:
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-orange-50/50 p-5 rounded-2xl border border-orange-100/50">
+                <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center mb-4">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">1. Teacher</h3>
+                <p className="text-sm text-gray-600">Start here. Learn the absolute basics step-by-step, including the alphabet, numbers, and your first essential phrases.</p>
+              </div>
+              <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50">
+                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-4">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">2. Learn & Explore</h3>
+                <p className="text-sm text-gray-600">Deepen your knowledge. Generate custom lessons, reading materials, and grammar explanations on any topic you choose.</p>
+              </div>
+              <div className="bg-green-50/50 p-5 rounded-2xl border border-green-100/50">
+                <div className="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-4">
+                  <MessageCircle className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">3. Tutor Chat</h3>
+                <p className="text-sm text-gray-600">Practice makes perfect. Chat interactively with our AI tutor to improve your conversational skills and get instant feedback.</p>
+              </div>
+              <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100/50">
+                <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">4. My Journey</h3>
+                <p className="text-sm text-gray-600">Track your progress. Test your vocabulary, review your recent chat history, and monitor your overall learning statistics.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-[#f0eadd] sticky top-0 z-20 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4">
+          <nav className="flex overflow-x-auto hide-scrollbar gap-2 pb-0 font-medium text-sm md:text-base pt-2" style={{WebkitOverflowScrolling: 'touch'}}>
             {[
+              { id: 'teacher', label: 'Teacher', icon: <GraduationCap className="w-4 h-4" /> },
               { id: 'learn', label: 'Learn & Explore', icon: <BookOpen className="w-4 h-4" /> },
               { id: 'conversation', label: 'Tutor Chat', icon: <MessageCircle className="w-4 h-4" /> },
               { id: 'progress', label: 'My Journey', icon: <TrendingUp className="w-4 h-4" /> }
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'learn' | 'conversation' | 'progress')}
+                onClick={() => setActiveTab(tab.id as 'teacher' | 'learn' | 'conversation' | 'progress')}
                 className={`flex items-center gap-2 px-5 py-3 transition whitespace-nowrap border-b-[3px] md:-mb-px ${
                   activeTab === tab.id 
                     ? 'border-orange-500 text-orange-700 bg-orange-50/50 rounded-t-xl' 
@@ -62,10 +106,11 @@ export default function App() {
             ))}
           </nav>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        {activeTab === 'teacher' && <TeacherTab />}
         {activeTab === 'learn' && <LearnTab />}
         {activeTab === 'conversation' && <ConversationTab />}
         {activeTab === 'progress' && <ProgressTab />}
