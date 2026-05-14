@@ -1,8 +1,9 @@
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 
-export function playGermanAudio(text: string) {
+export function playGermanAudio(text: string, onEnd?: () => void) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     console.error("Speech synthesis not supported");
+    if(onEnd) onEnd();
     return;
   }
   
@@ -22,7 +23,14 @@ export function playGermanAudio(text: string) {
   
   currentUtterance = utterance; // Prevent garbage collection
   
-  utterance.onerror = (e) => console.error("Speech synthesis error", e);
+  utterance.onerror = (e) => {
+    console.error("Speech synthesis error", e);
+    if(onEnd) onEnd();
+  };
+
+  utterance.onend = () => {
+    if(onEnd) onEnd();
+  };
   
   window.speechSynthesis.speak(utterance);
 }

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getChatSession } from '../lib/gemini';
-import { Send, Loader2, Bot, User, Mic, MicOff, Volume2 } from 'lucide-react';
+import { Send, Loader2, Bot, User, Mic, MicOff, Volume2, Headphones } from 'lucide-react';
 import { useProgress } from '../store/progress';
 import { motion, AnimatePresence } from 'motion/react';
-import { playGermanAudio } from '../lib/audio';
+import { playGermanAudio, stopAudio } from '../lib/audio';
 
 type Message = {
   text: string;
@@ -13,17 +13,38 @@ type Message = {
 
 export default function ConversationTab() {
   const [messages, setMessages] = useState<Message[]>([
-    { text: "Hallo! Ich bin dein Deutschlehrer. Lass uns auf Deutsch schreiben! Wie geht es dir heute? (Hello! I am your German tutor. Let's practice in German! How are you today?)", sender: 'bot' }
+    { text: "Hallo! Ich bin dein Deutschlehrer. Lass uns auf Deutsch schreiben oder sprechen! Wie geht es dir heute? (Hello! I am your German tutor. Let's practice in German! How are you today?)", sender: 'bot' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [continuousMode, setContinuousMode] = useState(false);
   const [chatSession, setChatSession] = useState<any>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   
+  const finalTranscriptStrRef = useRef('');
+  const continuousModeRef = useRef(false);
+  const isListeningRef = useRef(false);
+  const autoSendTimeoutRef = useRef<any>(null);
+  const loadingRef = useRef(false);
+  
   const { increment } = useProgress();
+
+  useEffect(() => {
+    continuousModeRef.current = continuousMode;
+  }, [continuousMode]);
+
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
+
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  const handleMessageSubmitRef = useRef<(text: string) => void>();
 
   useEffect(() => {
     // Initialize single chat session when component mounts
@@ -43,9 +64,8 @@ export default function ConversationTab() {
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
 
-        let finalTranscriptStr = '';
         recognitionRef.current.onstart = () => {
-          finalTranscriptStr = '';
+          finalTranscriptStrRef.current = '';
         };
 
         recognitionRef.current.onresult = (event: any) => {
@@ -59,11 +79,20 @@ export default function ConversationTab() {
             }
           }
           if (currentFinal) {
-             finalTranscriptStr += (finalTranscriptStr ? ' ' : '') + currentFinal;
+             finalTranscriptStrRef.current += (finalTranscriptStrRef.current ? ' ' : '') + currentFinal;
           }
-          const displayText = finalTranscriptStr + (interimTranscript ? ' ' + interimTranscript : '');
+          const displayText = finalTranscriptStrRef.current + (interimTranscript ? ' ' + interimTranscript : '');
           if (displayText) {
             setInput(displayText.trim());
+
+            if (continuousModeRef.current && currentFinal) {
+               clearTimeout(autoSendTimeoutRef.current);
+               autoSendTimeoutRef.current = setTimeout(() => {
+                  if (handleMessageSubmitRef.current) {
+                     handleMessageSubmitRef.current(displayText.trim());
+                  }
+               }, 1500); // Send 1.5s after final transcript
+            }
           }
         };
 
@@ -72,38 +101,62 @@ export default function ConversationTab() {
           setIsListening(false);
           if (event.error === 'not-allowed') {
              alert('Microphone permission was denied. If you are using this inside a preview or iframe, please open the app in a new tab by clicking the "Open in new tab" icon at the top, or check your browser settings.');
+             setContinuousMode(false);
           }
         };
 
         recognitionRef.current.onend = () => {
           setIsListening(false);
+          // If in continuous mode and not loading, we might have disconnected accidentally, but let's 
+          // let the playGermanAudio onEnd handler manage restarting the mic to avoid double-listening loops.
         };
       }
     }
+    
+    return () => stopAudio();
   }, []);
 
-  const toggleListening = async () => {
+  const startListening = async () => {
     if (!recognitionRef.current) {
       alert("Speech recognition is not supported in your browser.");
       return;
     }
-    
-    if (isListening) {
-      recognitionRef.current.stop();
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch (e: any) {
+      console.error("Mic error:", e);
+      setContinuousMode(false);
       setIsListening(false);
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      setContinuousMode(false);
     } else {
-      try {
-        // Request microphone permission explicitly
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e: any) {
-        console.error(e);
-        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-           alert("Microphone permission was denied. If you are using this inside a preview or iframe, please open the app in a new tab by clicking the 'Open in new tab' icon at the top, or check your browser settings.");
-        } else {
-           alert("Error accessing microphone: " + e.message);
-        }
+      startListening();
+    }
+  };
+
+  const toggleContinuousMode = () => {
+    if (continuousMode) {
+      // Turn off
+      setContinuousMode(false);
+      stopAudio();
+      if (isListening) {
+         recognitionRef.current?.stop();
+         setIsListening(false);
+      }
+    } else {
+      // Turn on
+      setContinuousMode(true);
+      stopAudio();
+      if (!isListening) {
+         startListening();
       }
     }
   };
@@ -116,39 +169,76 @@ export default function ConversationTab() {
     scrollToBottom();
   }, [messages, isListening]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || !chatSession || loading) return;
+  const handleMessageSubmit = async (textToSend: string) => {
+    if (!textToSend.trim() || !chatSession || loadingRef.current) return;
 
-    if (isListening) {
+    if (isListeningRef.current) {
       recognitionRef.current?.stop();
       setIsListening(false);
     }
+    
+    clearTimeout(autoSendTimeoutRef.current);
+    finalTranscriptStrRef.current = '';
 
-    const userMsg = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { text: userMsg, sender: 'user' }]);
+    setMessages(prev => [...prev, { text: textToSend, sender: 'user' }]);
     increment('conversationMessages');
     setLoading(true);
 
     try {
-      const response = await chatSession.sendMessage({ message: userMsg });
+      const response = await chatSession.sendMessage({ message: textToSend });
       setMessages(prev => [...prev, { text: response.text, sender: 'bot' }]);
-      // Optionally play the response automatically:
-      // playGermanAudio(response.text);
+      
+      if (continuousModeRef.current) {
+        playGermanAudio(response.text, () => {
+           if (continuousModeRef.current) {
+              startListening();
+           }
+        });
+      }
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, { text: "Sorry, I had trouble responding. Please try again.", sender: 'bot', isError: true }]);
+      if (continuousModeRef.current) {
+        startListening();
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Sync ref for timeout access
+  useEffect(() => {
+    handleMessageSubmitRef.current = handleMessageSubmit;
+  });
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim()) {
+       handleMessageSubmit(input.trim());
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm border border-[#f0eadd] overflow-hidden flex flex-col h-[75vh]">
-      <div className="p-5 bg-[#fcf8f2] border-b border-[#f0eadd] text-orange-900 font-serif text-xl flex items-center justify-center gap-3">
-        <Bot className="w-6 h-6 text-orange-500" />
-        Deutschlehrer (German Tutor)
+      <div className="p-3 sm:p-5 bg-[#fcf8f2] border-b border-[#f0eadd] text-orange-900 font-serif text-xl flex items-center justify-between sm:justify-center gap-3 relative">
+        <div className="flex items-center gap-2 sm:gap-3 mx-auto">
+          <Bot className="w-6 h-6 text-orange-500" />
+          Deutschlehrer <span className="hidden sm:inline">(German Tutor)</span>
+        </div>
+        
+        <button
+          onClick={toggleContinuousMode}
+          className={`absolute right-4 px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors border shadow-sm ${
+            continuousMode 
+              ? 'bg-orange-100 text-orange-700 border-orange-200' 
+              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+          }`}
+          title="Voice Conversation Mode"
+        >
+          <Headphones className="w-4 h-4" />
+          <span className="hidden sm:inline">{continuousMode ? 'Voice Mode On' : 'Voice Mode'}</span>
+        </button>
       </div>
       
       <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#fdfbf7] hide-scrollbar" style={{WebkitOverflowScrolling: 'touch'}}>
