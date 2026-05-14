@@ -1,6 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is missing. Please add it to your environment variables.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 const RESPONSE_SCHEMA = {
   type: Type.OBJECT,
@@ -39,6 +50,7 @@ const RESPONSE_SCHEMA = {
 };
 
 export async function generateLearningMaterial(subject: string) {
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3.1-pro-preview",
     contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
@@ -53,6 +65,7 @@ export async function generateLearningMaterial(subject: string) {
 }
 
 export function getChatSession() {
+  const ai = getAI();
   return ai.chats.create({
     model: "gemini-3.1-pro-preview",
     config: {

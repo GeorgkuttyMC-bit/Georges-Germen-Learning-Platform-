@@ -23,7 +23,12 @@ export default function ConversationTab() {
 
   useEffect(() => {
     // Initialize single chat session when component mounts
-    setChatSession(getChatSession());
+    try {
+      setChatSession(getChatSession());
+    } catch (err) {
+      console.error("Failed to initialize chat session", err);
+      setMessages([{ text: "Error: Missing GEMINI_API_KEY. Please add it to your environment variables.", sender: 'bot', isError: true }]);
+    }
   }, []);
 
   const scrollToBottom = () => {

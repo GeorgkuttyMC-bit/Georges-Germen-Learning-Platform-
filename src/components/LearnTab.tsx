@@ -38,9 +38,9 @@ export default function LearnTab() {
       const data = await generateLearningMaterial(subject);
       setMaterial(data as Material);
       increment('subjectsExplored');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to generate material:", error);
-      alert("Failed to generate learning material. Please try another subject.");
+      alert(`Failed to generate learning material: ${error.message}`);
     } finally {
       setLoading(false);
     }
