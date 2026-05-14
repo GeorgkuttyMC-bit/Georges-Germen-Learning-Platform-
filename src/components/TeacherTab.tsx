@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { BookA, Hash, BookHeart, MessageSquare, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+const playPronunciation = (text: string) => {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'de-DE';
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 const lettersData = [
   { letter: "A a", name: "Ah", explanation: "Pronounced like the 'a' in 'father'.", words: [{ de: "Apfel", en: "Apple" }, { de: "Auto", en: "Car" }] },
   { letter: "B b", name: "Bay", explanation: "Pronounced like the English 'b'.", words: [{ de: "Baum", en: "Tree" }, { de: "Buch", en: "Book" }] },
@@ -37,12 +45,6 @@ const lettersData = [
 
 function LettersLesson() {
   const [selectedLetter, setSelectedLetter] = useState(lettersData[0]);
-
-  const playPronunciation = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'de-DE';
-    window.speechSynthesis.speak(utterance);
-  };
 
   const handleSelectLetter = (l: typeof lettersData[0]) => {
     setSelectedLetter(l);
@@ -112,6 +114,41 @@ function LettersLesson() {
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Grammar Section */}
+      <div className="bg-blue-50/50 p-6 md:p-8 rounded-3xl border border-blue-100 mt-8">
+        <h4 className="font-serif text-2xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+          <BookA className="w-6 h-6 text-blue-600" />
+          Grammar Focus: Umlauts (ä, ö, ü)
+        </h4>
+        <p className="text-gray-700 text-base mb-6 leading-relaxed">
+          German features three special vowels called <strong>Umlauts</strong>. Originating from combining the base vowel with an 'e' sound, they modify the pronunciation. If you cannot type the characters, you can write them as 'ae', 'oe', and 'ue'.
+        </p>
+        <div className="flex gap-4 flex-wrap">
+          {[
+            { char: 'ä', word: 'Äpfel', pron: 'A-Umlaut' },
+            { char: 'ö', word: 'Öl', pron: 'O-Umlaut' },
+            { char: 'ü', word: 'Übung', pron: 'U-Umlaut' }
+          ].map(u => (
+            <div key={u.char} className="bg-white px-4 py-3 rounded-2xl border border-blue-100 shadow-sm flex items-center gap-3">
+              <div className="text-2xl font-serif font-bold text-blue-900">{u.char}</div>
+              <div className="w-px h-8 bg-blue-100"></div>
+              <div>
+                <div className="text-sm font-medium text-gray-500">{u.pron}</div>
+                <div className="flex items-center gap-2">
+                   <div className="font-semibold text-gray-900">{u.word}</div>
+                   <button
+                     onClick={() => playPronunciation(u.word)}
+                     className="p-1 rounded-full text-blue-400 hover:bg-blue-50 transition-colors"
+                   >
+                     <Volume2 className="w-4 h-4" />
+                   </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -149,11 +186,54 @@ const lessons = [
                 <div key={item.num} className="bg-white p-4 rounded-xl border border-gray-200 flex items-center shadow-sm">
                    <div className="text-3xl font-bold font-serif text-orange-500 w-12 text-center">{item.num}</div>
                    <div className="flex-1 ml-4 border-l border-gray-100 pl-4">
-                      <div className="font-bold text-gray-900 text-lg">{item.de}</div>
+                      <div className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                         {item.de}
+                         <button
+                           onClick={() => playPronunciation(item.de)}
+                           className="p-1 rounded-full text-orange-400 hover:bg-orange-50 transition-colors"
+                           aria-label={`Play pronunciation for ${item.de}`}
+                         >
+                           <Volume2 className="w-4 h-4" />
+                         </button>
+                      </div>
                       <div className="text-sm text-gray-500 italic">[{item.pron}]</div>
                    </div>
                 </div>
              ))}
+         </div>
+
+         {/* Grammar Section */}
+         <div className="bg-orange-50/50 p-6 md:p-8 rounded-3xl border border-orange-100 mt-8">
+            <h4 className="font-serif text-2xl font-bold text-orange-900 mb-3 flex items-center gap-2">
+              <Hash className="w-6 h-6 text-orange-600" />
+              Grammar Focus: Numbers & Noun Genders
+            </h4>
+            <p className="text-gray-700 text-base mb-6 leading-relaxed">
+              In German, every noun has a gender: <strong>masculine (der), feminine (die), or neuter (das)</strong>. While counting numbers from 2 to 10 do not change, the number <strong>1 (eins)</strong> drops the '-s' and changes its ending depending on the gender of the noun.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { title: 'Masculine (der Mann)', de: 'ein Mann', en: '1 / a man' },
+                { title: 'Feminine (die Frau)', de: 'eine Frau', en: '1 / a woman' },
+                { title: 'Neuter (das Kind)', de: 'ein Kind', en: '1 / a child' }
+              ].map(g => (
+                 <div key={g.title} className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm">
+                   <div className="text-sm text-gray-500 font-medium mb-1">{g.title}</div>
+                   <div className="flex justify-between items-center">
+                     <div>
+                       <div className="font-bold text-gray-900">{g.de}</div>
+                       <div className="text-sm text-gray-500 italic">{g.en}</div>
+                     </div>
+                     <button
+                        onClick={() => playPronunciation(g.de)}
+                        className="p-1.5 rounded-full bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors"
+                     >
+                       <Volume2 className="w-4 h-4" />
+                     </button>
+                   </div>
+                 </div>
+              ))}
+            </div>
          </div>
       </div>
     )
@@ -181,11 +261,47 @@ const lessons = [
                      { de: 'Frau', en: 'Woman (die)' },
                   ].map(word => (
                      <div key={word.de} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0 md:odd:pr-4 md:even:pl-4 md:border-b md:nth-last-child(-n+2):border-0">
-                         <span className="font-medium text-lg text-gray-900">{word.de}</span>
-                         <span className="text-gray-500">{word.en}</span>
+                         <div className="flex items-center gap-2">
+                             <span className="font-medium text-lg text-gray-900">{word.de}</span>
+                             <button
+                               onClick={() => playPronunciation(word.de)}
+                               className="p-1.5 rounded-full text-orange-400 hover:bg-orange-50 transition-colors"
+                               aria-label={`Play pronunciation for ${word.de}`}
+                             >
+                               <Volume2 className="w-4 h-4" />
+                             </button>
+                         </div>
+                         <span className="text-gray-500 text-right">{word.en}</span>
                      </div>
                   ))}
               </div>
+          </div>
+
+          {/* Grammar Section */}
+          <div className="bg-blue-50/50 p-6 md:p-8 rounded-3xl border border-blue-100 mt-8">
+            <h4 className="font-serif text-2xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <BookA className="w-6 h-6 text-blue-600" />
+              Grammar Focus: Capitalizing Nouns
+            </h4>
+            <p className="text-gray-700 text-base mb-6 leading-relaxed">
+              Unlike English, where only proper nouns are capitalized, in German <strong>every single noun is capitalized</strong>. This rule makes it easy to spot the subjects and objects in a sentence!
+            </p>
+            <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+               <div>
+                 <div className="font-medium text-lg text-gray-900">
+                   Der <span className="text-blue-600 font-bold">M</span>ann gibt der <span className="text-blue-600 font-bold">F</span>rau den <span className="text-blue-600 font-bold">A</span>pfel.
+                 </div>
+                 <div className="text-gray-500 text-sm mt-1">
+                   Translation: The man gives the woman the apple.
+                 </div>
+               </div>
+               <button
+                  onClick={() => playPronunciation("Der Mann gibt der Frau den Apfel.")}
+                  className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+               >
+                 <Volume2 className="w-5 h-5" />
+               </button>
+            </div>
           </div>
        </div>
     )
@@ -208,7 +324,16 @@ const lessons = [
                { phrase: 'Ich spreche ein bisschen Deutsch.', meaning: 'I speak a little German.', literal: 'I speak a little German.' },
              ].map((item, i) => (
                 <div key={i} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                   <div className="font-bold text-xl text-orange-700 mb-2">{item.phrase}</div>
+                   <div className="font-bold text-xl text-orange-700 mb-2 flex flex-row items-center gap-2">
+                       {item.phrase}
+                       <button
+                         onClick={() => playPronunciation(item.phrase)}
+                         className="p-1 rounded-full text-orange-400 hover:bg-orange-50 transition-colors"
+                         aria-label={`Play pronunciation for ${item.phrase}`}
+                       >
+                         <Volume2 className="w-5 h-5" />
+                       </button>
+                   </div>
                    <div className="flex flex-col sm:flex-row gap-2 sm:items-center text-sm md:text-base">
                        <span className="text-gray-900 font-medium">{item.meaning}</span>
                        <span className="hidden sm:inline text-gray-300">|</span>
@@ -216,6 +341,39 @@ const lessons = [
                    </div>
                 </div>
              ))}
+         </div>
+
+         {/* Grammar Section */}
+         <div className="bg-purple-50/50 p-6 md:p-8 rounded-3xl border border-purple-100 mt-8">
+            <h4 className="font-serif text-2xl font-bold text-purple-900 mb-3 flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-purple-600" />
+              Grammar Focus: Formal vs. Informal "You"
+            </h4>
+            <p className="text-gray-700 text-base mb-6 leading-relaxed">
+              In German, the word for "you" changes based on your relationship with the person. Use <strong>du</strong> (or "dir") with friends, family, and children. Use <strong>Sie</strong> (or "Ihnen") with strangers, authority figures, and in formal or business contexts. <em>Note: Formal 'Sie' is always capitalized!</em>
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                { title: 'Informal (Friends / Family)', de: 'Wie geht es dir?', en: 'How are you?' },
+                { title: 'Formal (Strangers / Work)', de: 'Wie geht es Ihnen?', en: 'How are you?' }
+              ].map(g => (
+                 <div key={g.title} className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm">
+                   <div className="text-sm text-gray-500 font-medium mb-1">{g.title}</div>
+                   <div className="flex justify-between items-center">
+                     <div>
+                       <div className="font-bold text-gray-900">{g.de}</div>
+                       <div className="text-sm text-gray-500 italic">{g.en}</div>
+                     </div>
+                     <button
+                        onClick={() => playPronunciation(g.de)}
+                        className="p-1.5 rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+                     >
+                       <Volume2 className="w-4 h-4" />
+                     </button>
+                   </div>
+                 </div>
+              ))}
+            </div>
          </div>
       </div>
     )

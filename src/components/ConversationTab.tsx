@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { getChatSession } from '../lib/gemini';
 import { Send, Loader2, Bot, User, Mic, MicOff, Volume2 } from 'lucide-react';
 import { useProgress } from '../store/progress';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { playGermanAudio } from '../lib/audio';
 
 type Message = {
@@ -40,18 +40,30 @@ export default function ConversationTab() {
       if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.lang = 'de-DE';
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+
+        let finalTranscriptStr = '';
+        recognitionRef.current.onstart = () => {
+          finalTranscriptStr = '';
+        };
 
         recognitionRef.current.onresult = (event: any) => {
-          let finalTranscript = '';
+          let interimTranscript = '';
+          let currentFinal = '';
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             if (event.results[i].isFinal) {
-              finalTranscript += event.results[i][0].transcript;
+              currentFinal += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
             }
           }
-          if (finalTranscript) {
-            setInput((prev) => prev + (prev ? ' ' : '') + finalTranscript);
+          if (currentFinal) {
+             finalTranscriptStr += (finalTranscriptStr ? ' ' : '') + currentFinal;
+          }
+          const displayText = finalTranscriptStr + (interimTranscript ? ' ' + interimTranscript : '');
+          if (displayText) {
+            setInput(displayText.trim());
           }
         };
 
@@ -196,7 +208,20 @@ export default function ConversationTab() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 sm:p-5 bg-white border-t border-[#f0eadd] shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+      <div className="p-4 sm:p-5 bg-white border-t border-[#f0eadd] shadow-[0_-4px_20px_rgba(0,0,0,0.02)] relative">
+        <AnimatePresence>
+          {isListening && (
+            <motion.div 
+               initial={{ opacity: 0, y: 10, x: '-50%' }}
+               animate={{ opacity: 1, y: 0, x: '-50%' }}
+               exit={{ opacity: 0, y: 10, x: '-50%' }}
+               className="absolute bottom-full mb-3 left-1/2 text-orange-600 font-medium flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-full border border-orange-200 text-sm shadow-sm"
+            >
+               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+               Zuhören... (Listening...)
+            </motion.div>
+          )}
+        </AnimatePresence>
         <form onSubmit={handleSend} className="flex gap-2 sm:gap-3">
           <button
             type="button"
