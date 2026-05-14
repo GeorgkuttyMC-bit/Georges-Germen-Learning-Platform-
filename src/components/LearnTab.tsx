@@ -151,10 +151,10 @@ export default function LearnTab() {
                     <div className="font-bold text-gray-900 text-xl leading-tight font-serif">{v.word}</div>
                     <button
                       onClick={() => playGermanAudio(v.word)}
-                      className="p-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-orange-500 hover:bg-orange-50 transition flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                      className="p-2 rounded-full bg-orange-50 shadow-sm border border-orange-100 text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition flex-shrink-0 focus:ring-2 focus:ring-orange-500/50"
                       title="Listen to pronunciation"
                     >
-                      <Volume2 className="w-4 h-4" />
+                      <Volume2 className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="text-gray-600 font-medium">{v.translation}</div>
