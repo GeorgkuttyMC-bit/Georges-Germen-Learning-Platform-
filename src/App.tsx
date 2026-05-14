@@ -33,9 +33,9 @@ export default function App() {
       {/* Header Top & Welcome */}
       <header className="bg-white/80 backdrop-blur-md pt-4">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 space-y-4 md:space-y-0 relative">
             
-            <div className="flex justify-between items-center w-full md:w-auto">
+            <div className="flex justify-between items-center w-full md:w-auto md:flex-1">
               <div className="flex items-center gap-3 text-orange-700">
                 <div className="flex-shrink-0 w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-gray-200 flex items-center justify-center bg-white">
                   <svg viewBox="0 0 5 3" className="w-full h-full object-cover">
@@ -51,15 +51,19 @@ export default function App() {
               </div>
             </div>
             
-            <a
-              href="https://wa.me/9496012521?text=Hi%20George!%20I%20have%20a%20suggestion%20to%20upgrade%20the%20website... "
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center md:justify-start gap-2 px-5 py-2.5 rounded-full font-medium transition bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:text-green-800 text-sm shadow-sm group w-full md:w-auto"
-            >
-              <Lightbulb className="w-4 h-4 group-hover:text-yellow-500 transition-colors" />
-              <span>Suggestions for George</span>
-            </a>
+            <div className="flex justify-center w-full md:w-auto md:absolute md:left-1/2 md:-translate-x-1/2">
+              <a
+                href="https://wa.me/9496012521?text=Hi%20George!%20I%20have%20a%20suggestion%20to%20upgrade%20the%20website... "
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium transition bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:text-green-800 text-sm shadow-sm group w-full md:w-auto"
+              >
+                <Lightbulb className="w-4 h-4 group-hover:text-yellow-500 transition-colors" />
+                <span>Suggestions for George</span>
+              </a>
+            </div>
+
+            <div className="hidden md:block md:flex-1"></div>
           </div>
 
           <div className="mb-8 bg-white rounded-[2rem] p-6 md:p-10 shadow-sm border border-[#f0eadd]">
