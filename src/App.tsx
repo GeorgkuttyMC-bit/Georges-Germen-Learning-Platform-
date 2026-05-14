@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LearnTab from './components/LearnTab';
 import ConversationTab from './components/ConversationTab';
 import ProgressTab from './components/ProgressTab';
-import { BookOpen, MessageCircle, TrendingUp, Languages, Lightbulb } from 'lucide-react';
+import { BookOpen, MessageCircle, TrendingUp, Lightbulb } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'learn' | 'conversation' | 'progress'>('learn');
@@ -16,8 +16,12 @@ export default function App() {
             
             <div className="flex justify-between items-center w-full md:w-auto">
               <div className="flex items-center gap-3 text-orange-700">
-                <div className="bg-orange-50 p-2.5 rounded-2xl shadow-sm border border-orange-100">
-                  <Languages className="w-6 h-6 text-orange-600" />
+                <div className="flex-shrink-0 w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-gray-200 flex items-center justify-center bg-white">
+                  <svg viewBox="0 0 5 3" className="w-full h-full object-cover">
+                    <rect width="5" height="3" y="0" fill="#000000" />
+                    <rect width="5" height="2" y="1" fill="#DD0000" />
+                    <rect width="5" height="1" y="2" fill="#FFCE00" />
+                  </svg>
                 </div>
                 <div className="flex flex-col">
                   <span className="font-serif font-bold text-2xl tracking-tight leading-none text-gray-900">Georges German</span>

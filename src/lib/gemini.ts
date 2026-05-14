@@ -19,6 +19,26 @@ const RESPONSE_SCHEMA = {
     explanation: { type: Type.STRING, description: "A brief, clear explanation of the subject in English." },
     essay: { type: Type.STRING, description: "A short story or essay in German about the subject (about 4-5 paragraphs)." },
     essayTranslation: { type: Type.STRING, description: "English translation of the essay." },
+    grammarConcept: {
+      type: Type.OBJECT,
+      description: "A key grammar concept used in the essay with explanation and examples.",
+      properties: {
+        concept: { type: Type.STRING, description: "Name of the grammar concept (e.g., 'Dative Case', 'Separable Verbs')." },
+        explanation: { type: Type.STRING, description: "Clear explanation of the rule." },
+        examples: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              german: { type: Type.STRING },
+              english: { type: Type.STRING }
+            },
+            required: ["german", "english"]
+          }
+        }
+      },
+      required: ["concept", "explanation", "examples"]
+    },
     vocabulary: {
       type: Type.ARRAY,
       items: {
@@ -46,14 +66,14 @@ const RESPONSE_SCHEMA = {
       }
     }
   },
-  required: ["explanation", "essay", "essayTranslation", "vocabulary", "quizzes"]
+  required: ["explanation", "essay", "essayTranslation", "grammarConcept", "vocabulary", "quizzes"]
 };
 
 export async function generateLearningMaterial(subject: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
+    contents: `Generate a comprehensive German learning material about the subject: "${subject}". Include an explanation, a German essay/story, its translation, a key grammar concept from the essay, a vocabulary list, and 3 multiple-choice questions to test comprehension.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,

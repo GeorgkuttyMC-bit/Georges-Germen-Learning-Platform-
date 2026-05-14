@@ -9,6 +9,11 @@ type Material = {
   explanation: string;
   essay: string;
   essayTranslation: string;
+  grammarConcept: {
+    concept: string;
+    explanation: string;
+    examples: { german: string; english: string }[];
+  };
   vocabulary: { word: string; translation: string }[];
   quizzes: { question: string; options: string[]; correctOptionIndex: number }[];
 };
@@ -94,6 +99,23 @@ export default function LearnTab() {
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Generate Lesson'}
           </button>
         </form>
+
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="text-sm font-medium text-gray-500 mb-3">Or choose a suggested topic:</p>
+          <div className="flex flex-wrap gap-2">
+            {['Oktoberfest in Munich', 'The Black Forest', 'German Engineering', 'The Berlin Wall', 'Currywurst and Food Culture'].map((topic) => (
+              <button
+                key={topic}
+                type="button"
+                onClick={() => setSubject(topic)}
+                disabled={loading}
+                className="px-4 py-2 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-100 rounded-full text-sm font-medium transition disabled:opacity-50"
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {loading && (
@@ -101,6 +123,103 @@ export default function LearnTab() {
           <Loader2 className="w-12 h-12 animate-spin text-orange-500" />
           <p className="text-xl font-medium tracking-wide">Crafting your personalized German lesson...</p>
         </div>
+      )}
+
+      {!material && !loading && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-12 space-y-12"
+        >
+          {/* Introduction Section */}
+          <div className="space-y-8">
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <h3 className="font-serif text-3xl font-bold text-gray-900">Why Learn German?</h3>
+              <p className="text-gray-600 text-lg">
+                Discover the endless possibilities that come with mastering the German language. From world-class education to thriving career opportunities.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#f0eadd]">
+                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <h4 className="font-serif text-xl font-semibold text-gray-900 mb-3">World-Class Education</h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Germany is renowned for its high-quality education system. Most public universities offer tuition-free study programs for international students, with degrees recognized globally. Learning German opens doors to thousands of academic programs in engineering, science, arts, and humanities.
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#f0eadd]">
+                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+                </div>
+                <h4 className="font-serif text-xl font-semibold text-gray-900 mb-3">Global Career Opportunities</h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Germany boasts the largest economy in Europe and the third-largest globally. It's home to major international corporations like Volkswagen, Siemens, and BMW. Proficiency in German gives you a competitive edge in international business and STEM fields, both in Europe and worldwide.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-2xl font-bold text-gray-900">Discover Germany</h3>
+              <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full">Inspiration</span>
+            </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group relative rounded-3xl overflow-hidden aspect-video shadow-sm border border-gray-100">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Schloss_Neuschwanstein_2013.jpg/1024px-Schloss_Neuschwanstein_2013.jpg" 
+                alt="Neuschwanstein Castle"
+                className="w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-6">
+                <h4 className="text-white font-serif text-xl font-bold mb-1">Neuschwanstein Castle</h4>
+                <p className="text-white/80 text-sm">Bavaria</p>
+              </div>
+            </div>
+            
+            <div className="group relative rounded-3xl overflow-hidden aspect-video shadow-sm border border-gray-100">
+              <img 
+                src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?q=80&w=2670&auto=format&fit=crop" 
+                alt="Brandenburg Gate"
+                className="w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-6">
+                <h4 className="text-white font-serif text-xl font-bold mb-1">Brandenburg Gate</h4>
+                <p className="text-white/80 text-sm">Berlin</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-black aspect-video relative">
+             <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/n21uF3b6lYc?autoplay=1&mute=1&loop=1&playlist=n21uF3b6lYc&controls=0&showinfo=0&rel=0&modestbranding=1" 
+                title="Germany Cinematic Aerial" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+                className="absolute inset-0 pointer-events-none"
+                style={{ transform: 'scale(1.2)' }}
+             ></iframe>
+             <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+             <div className="absolute bottom-0 left-0 p-6 md:p-8 pointer-events-none">
+                <h4 className="text-white font-serif text-2xl md:text-3xl font-bold mb-2 drop-shadow-md">Beautiful Landscapes</h4>
+                <p className="text-white/90 text-sm md:text-base drop-shadow-md max-w-lg">Get inspired by the diverse and beautiful landscapes, from the Alpine peaks to the bustling cities of Germany.</p>
+             </div>
+          </div>
+          </div>
+        </motion.div>
       )}
 
       {material && !loading && (
@@ -140,6 +259,25 @@ export default function LearnTab() {
               </div>
             </div>
           </div>
+
+          {/* Grammar Concept */}
+          {material.grammarConcept && (
+            <div className="bg-[#f0f4f8] p-6 md:p-8 rounded-3xl shadow-sm border border-blue-100">
+              <h3 className="font-serif text-2xl font-semibold text-blue-900 mb-4 flex items-center gap-3">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+                Grammar Focus: {material.grammarConcept.concept}
+              </h3>
+              <p className="text-blue-800 leading-relaxed text-lg mb-6">{material.grammarConcept.explanation}</p>
+              <div className="space-y-4">
+                 {material.grammarConcept.examples.map((ex, i) => (
+                   <div key={i} className="bg-white p-4 rounded-2xl border border-blue-100/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="font-medium text-gray-900 text-lg">{ex.german}</div>
+                      <div className="text-gray-500 italic sm:border-l sm:border-gray-200 sm:pl-4">{ex.english}</div>
+                   </div>
+                 ))}
+              </div>
+            </div>
+          )}
 
           {/* Vocabulary */}
           <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#f0eadd]">
