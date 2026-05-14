@@ -163,62 +163,6 @@ export default function LearnTab() {
               </div>
             </div>
           </div>
-
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif text-2xl font-bold text-gray-900">Discover Germany</h3>
-              <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full">Inspiration</span>
-            </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="group relative rounded-3xl overflow-hidden aspect-video shadow-sm border border-gray-100">
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Schloss_Neuschwanstein_2013.jpg/1024px-Schloss_Neuschwanstein_2013.jpg" 
-                alt="Neuschwanstein Castle"
-                className="w-full h-full object-cover transition duration-700 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 p-6">
-                <h4 className="text-white font-serif text-xl font-bold mb-1">Neuschwanstein Castle</h4>
-                <p className="text-white/80 text-sm">Bavaria</p>
-              </div>
-            </div>
-            
-            <div className="group relative rounded-3xl overflow-hidden aspect-video shadow-sm border border-gray-100">
-              <img 
-                src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?q=80&w=2670&auto=format&fit=crop" 
-                alt="Brandenburg Gate"
-                className="w-full h-full object-cover transition duration-700 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 p-6">
-                <h4 className="text-white font-serif text-xl font-bold mb-1">Brandenburg Gate</h4>
-                <p className="text-white/80 text-sm">Berlin</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-black aspect-video relative">
-             <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/n21uF3b6lYc?autoplay=1&mute=1&loop=1&playlist=n21uF3b6lYc&controls=0&showinfo=0&rel=0&modestbranding=1" 
-                title="Germany Cinematic Aerial" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                className="absolute inset-0 pointer-events-none"
-                style={{ transform: 'scale(1.2)' }}
-             ></iframe>
-             <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
-             <div className="absolute bottom-0 left-0 p-6 md:p-8 pointer-events-none">
-                <h4 className="text-white font-serif text-2xl md:text-3xl font-bold mb-2 drop-shadow-md">Beautiful Landscapes</h4>
-                <p className="text-white/90 text-sm md:text-base drop-shadow-md max-w-lg">Get inspired by the diverse and beautiful landscapes, from the Alpine peaks to the bustling cities of Germany.</p>
-             </div>
-          </div>
-          </div>
         </motion.div>
       )}
 
