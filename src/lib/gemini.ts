@@ -4,7 +4,9 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    // We are temporarily hardcoding the API key provided so it works on Vercel natively.
+    // Note: For a production app, it is better to hide this in a backend.
+    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyCZSBvXmBOnH-kjLD2DhyKG_TlCBYDWNBY";
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY is missing. Please add it to your environment variables.");
     }
