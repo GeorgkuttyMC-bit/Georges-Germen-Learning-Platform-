@@ -58,6 +58,9 @@ export default function ConversationTab() {
         recognitionRef.current.onerror = (event: any) => {
           console.error('Speech recognition error', event.error);
           setIsListening(false);
+          if (event.error === 'not-allowed') {
+             alert('Microphone permission was denied. If you are using this inside a preview or iframe, please open the app in a new tab by clicking the "Open in new tab" icon at the top, or check your browser settings.');
+          }
         };
 
         recognitionRef.current.onend = () => {
@@ -67,7 +70,7 @@ export default function ConversationTab() {
     }
   }, []);
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     if (!recognitionRef.current) {
       alert("Speech recognition is not supported in your browser.");
       return;
@@ -78,10 +81,17 @@ export default function ConversationTab() {
       setIsListening(false);
     } else {
       try {
+        // Request microphone permission explicitly
+        await navigator.mediaDevices.getUserMedia({ audio: true });
         recognitionRef.current.start();
         setIsListening(true);
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+           alert("Microphone permission was denied. If you are using this inside a preview or iframe, please open the app in a new tab by clicking the 'Open in new tab' icon at the top, or check your browser settings.");
+        } else {
+           alert("Error accessing microphone: " + e.message);
+        }
       }
     }
   };
