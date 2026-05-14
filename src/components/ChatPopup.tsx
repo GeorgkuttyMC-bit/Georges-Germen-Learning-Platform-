@@ -214,10 +214,10 @@ export default function ChatPopup({ onClose }: { onClose: () => void }) {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="fixed bottom-6 right-6 w-[400px] h-[550px] bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col z-50"
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      className="fixed top-20 right-4 md:top-6 md:right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[80vh] bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col z-50"
     >
       <div className="p-4 bg-orange-600 text-white flex items-center justify-between">
         <div className="flex items-center gap-3">

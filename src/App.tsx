@@ -120,7 +120,7 @@ export default function App() {
       {!isChatOpen && (
         <button
           onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 z-50 group"
+          className="fixed top-24 right-6 md:top-6 md:right-6 w-16 h-16 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 z-50 group"
           title="Open Tutor Chat"
         >
           <MessageCircle className="w-8 h-8" />
